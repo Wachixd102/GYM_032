@@ -8,6 +8,57 @@ import joblib
 import plotly.graph_objects as go
 import plotly.express as px
 
+
+
+# เพิ่มโค้ดนี้ไว้บนสุดของ app.py (หลัง import)
+import traceback
+
+# ============================================================
+# โหลดโมเดล - พร้อม Error Handling แบบละเอียด
+# ============================================================
+@st.cache_resource
+def load_model():
+    try:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        model_path = os.path.join(current_dir, 'svm_health_prediction_model.joblib')
+        info_path = os.path.join(current_dir, 'streamlit_model_info.joblib')
+        
+        # ตรวจสอบว่ามีไฟล์หรือไม่
+        if not os.path.exists(model_path):
+            st.error(f"❌ ไม่พบไฟล์โมเดล: {model_path}")
+            st.info("📂 ไฟล์ในโฟลเดอร์ปัจจุบัน:")
+            files = os.listdir(current_dir)
+            for f in files:
+                size = os.path.getsize(os.path.join(current_dir, f)) / 1024
+                st.write(f"  • {f} ({size:.2f} KB)")
+            return None, None
+        
+        if not os.path.exists(info_path):
+            st.error(f"❌ ไม่พบไฟล์ metadata: {info_path}")
+            return None, None
+        
+        model = joblib.load(model_path)
+        info = joblib.load(info_path)
+        return model, info
+    
+    except Exception as e:
+        st.error(f"❌ เกิดข้อผิดพลาดในการโหลดโมเดล")
+        st.error(f"**Error Type:** {type(e).__name__}")
+        st.error(f"**Error Message:** {str(e)}")
+        st.code(traceback.format_exc())
+        return None, None
+
+
+
+
+
+
+
+
+
+
+
+
 # ตั้งค่าหน้าเว็บ
 st.set_page_config(
     page_title="Fitness Health Predictor",
